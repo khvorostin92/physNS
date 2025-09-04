@@ -1,4 +1,4 @@
-/* ===== ТЕМА (твоя палитра) ===== */
+/* ===== ТЕМА ===== */
 :root{
   --bg:#F2F2F2; --card:#FFFFFF; --text:#222A35; --text-weak:#333F50;
   --border:#D6DCE5; --accent:#44546A; --accent-2:#8497B0; --danger:#C00000;
@@ -11,54 +11,45 @@ body{
   -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
 }
 
-/* ===== ФИКСИРОВАННЫЙ ХЕДЕР (аккуратный) ===== */
+/* ===== КОНТЕЙНЕР 960px ===== */
+.container{ max-width:960px; margin:0 auto; width:100%; padding:0 4px; }
+.page-title{ margin:0 0 12px; padding:0 4px; font-size:28px; }
+
+/* ===== ХЕДЕР ===== */
 .app-header{
-  position:sticky; top:0; z-index:10;
-  background:#222A35; color:#fff;
-  border-bottom:1px solid #0002;
-  box-shadow:0 2px 16px rgba(0,0,0,.08);
+  position:sticky; top:0; z-index:10; background:#222A35; color:#fff;
+  border-bottom:1px solid #0002; box-shadow:0 2px 16px rgba(0,0,0,.08);
 }
 .app-header__inner{
-  max-width:1100px; margin:0 auto;
-  padding:10px 16px;
-  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:10px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px;
 }
-
-/* Бренд как ссылка (не тянется, красиво по центру по высоте) */
-.app-title{
-  display:flex; align-items:center; gap:10px;
-  font-size:18px; letter-spacing:.2px; white-space:nowrap;
-  color:#fff; text-decoration:none; cursor:pointer;
-}
+.app-title{ display:flex; align-items:center; gap:10px; font-size:18px; color:#fff; text-decoration:none; }
 .app-title svg{ width:22px; height:22px; flex:0 0 22px }
-.app-title:hover span{ text-decoration:underline; }
+/* Иконка-логотип устойчиво берет currentColor */
+.app-title .logo{
+  width:22px; height:22px; flex:0 0 22px; display:block;
+  color:#fff; /* линии/точка внутри svg получают этот цвет */
+}
 
-/* Компактный переключатель языков («пилюля») */
 .lang-toggle{
-  display:inline-flex; align-items:center; gap:4px;
-  padding:4px; border-radius:999px;
-  background: rgba(255,255,255,.10);
-  border: 1px solid rgba(255,255,255,.25);
-  backdrop-filter: blur(4px);
+  display:inline-flex; gap:4px; padding:4px; border-radius:999px;
+  background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.25); backdrop-filter:blur(4px);
 }
-/* Сбрасываем глобальные button-стили и делаем маленькие капсулы */
 .lang-toggle button{
-  all: unset;
-  display:inline-flex; align-items:center; justify-content:center;
-  padding:6px 10px; border-radius:999px; cursor:pointer;
-  color:#fff; font-size:13px; line-height:1;
+  all:unset; padding:6px 10px; border-radius:999px; cursor:pointer; color:#fff; font-size:13px;
 }
-.lang-toggle button:hover{ background: rgba(255,255,255,.12); }
-.lang-toggle button.active{ background:#fff; color:#222A35; }
+.lang-toggle button.active{ background:#fff; color:#222A35 }
 
-/* ===== КОНТЕНТ/КАРТОЧКИ/КНОПКИ/СЛАЙДЕРЫ (как было) ===== */
-.app-main{ max-width:1100px; margin:0 auto; padding:18px 16px 36px }
-.panel{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:14px }
-
+/* ===== ОСНОВНОЙ КОНТЕНТ ===== */
+.app-main{ padding:18px 16px 36px }
+.panel{
+  background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+  box-shadow:var(--shadow); padding:14px
+}
 button{
   padding:10px 14px; border-radius:12px; border:1px solid var(--border);
-  background:#fff; color:var(--text); font-size:14px; min-width:120px;
-  cursor:pointer; transition:transform .02s, box-shadow .2s, background .2s, border-color .2s;
+  background:#fff; color:var(--text); font-size:14px; min-width:120px; cursor:pointer;
+  transition:transform .02s, box-shadow .2s, background .2s, border-color .2s;
 }
 button:hover{ box-shadow:0 6px 18px rgba(34,42,53,.08) }
 button:active{ transform:translateY(1px) }
@@ -80,14 +71,98 @@ input[type="range"]::-moz-range-thumb{
   background:var(--accent); border:2px solid #fff; box-shadow:0 1px 6px rgba(0,0,0,.2); cursor:pointer;
 }
 
-.card-list{ display:grid; gap:12px; grid-template-columns:repeat(2,minmax(0,1fr)) }
-.card{
-  display:block; background:var(--card); border:1px solid var(--border);
-  border-radius:var(--radius); box-shadow:var(--shadow);
-  padding:14px; color:inherit; text-decoration:none;
+/* ===== КАТАЛОГ: верхняя полоса с заголовком и действиями ===== */
+.catalog-wrap{ position:relative; }
+.catalog-topbar{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;
 }
-.card:hover{ box-shadow:0 10px 28px rgba(34,42,53,.12) }
-@media (max-width:900px){ .card-list{ grid-template-columns:1fr } }
 
-a{ color:var(--accent); text-decoration:none }
-a:hover{ text-decoration:underline }
+/* Компактный поиск */
+.search-input{
+  width:100%; padding:10px 12px; border-radius:12px;
+  border:1px solid var(--border); background:#fff; font-size:14px;
+}
+.catalog-actions{ display:flex; gap:8px; align-items:center; }
+.search-input--compact{
+  width:220px; padding:8px 10px; font-size:13px; border-radius:10px;
+}
+
+/* Кнопка «Фильтры» */
+.filter-toggle{
+  padding:8px 12px; min-width:auto; border-radius:10px; display:inline-flex; align-items:center;
+}
+/* Иконка на кнопке — без лишних отступов */
+.filter-toggle svg{ display:block; }
+
+/* ===== ШТОРКА ФИЛЬТРОВ справа (внутри контейнера) ===== */
+.filters-drawer{
+  position:absolute; right:4px; top:48px;
+  width:300px; max-height:70vh; overflow:auto;
+  background:#fff; border:1px solid var(--border); border-radius:12px;
+  box-shadow:0 12px 36px rgba(34,42,53,.18);
+  opacity:0; transform: translateY(-6px); pointer-events:none; transition: .15s ease;
+  z-index:5;
+}
+.filters-drawer.open{
+  opacity:1; transform: translateY(0); pointer-events:auto;
+}
+.filters-drawer__header{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:10px 12px; border-bottom:1px solid var(--border);
+}
+.drawer-close{ padding:2px 8px; min-width:auto; border-radius:8px }
+.filters-drawer__section{ padding:10px 12px; display:grid; gap:8px }
+.filters-label{ color:var(--text-weak); font-size:13px }
+.checkbox-list{ display:grid; gap:6px }
+.checkbox-item{ display:flex; align-items:center; gap:8px; font-size:14px; }
+.checkbox-item input{ width:16px; height:16px }
+.checkbox-list--scroll{ max-height:220px; overflow:auto; padding-right:4px }
+.filters-drawer__footer{ padding:10px 12px; border-top:1px solid var(--border); display:flex; justify-content:flex-end }
+
+/* ===== КАТАЛОГ: карточки ===== */
+.catalog-grid{
+  margin-top:12px; display:grid; gap:12px;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+}
+@media (max-width:1000px){ .catalog-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (max-width:620px){ .catalog-grid{ grid-template-columns: 1fr; } }
+
+.sim-card{
+  display:grid; gap:8px; background:var(--card); border:1px solid var(--border);
+  border-radius:var(--radius); box-shadow:var(--shadow); padding:10px;
+  color:inherit; text-decoration:none;
+  text-align:center; /* название по центру */
+}
+.sim-card:hover{ box-shadow:0 10px 28px rgba(34,42,53,.12) }
+.sim-card .thumb{
+  width:100%; aspect-ratio:3/4; border-radius:10px; overflow:hidden; background:#fff;
+  margin:0 auto; /* центрируем превью */
+}
+.sim-card .thumb img{ width:100%; height:100%; object-fit:cover; display:block }
+.sim-title{ margin:0; font-size:16px; color:var(--text); text-align:center; }
+.catalog-empty{ text-align:center; color:var(--text-weak) }
+
+/* ===== Канвасы ===== */
+.canvas-frame{
+  width:960px; display:block; margin:12px auto 0;
+  border:1px solid var(--border); border-radius:var(--radius);
+  background:#fff; touch-action:none;
+}
+
+/* ===== Мобильная адаптация ===== */
+@media (max-width:900px){
+  .app-main{ padding:14px 12px 28px }
+}
+@media (max-width:600px){
+  .app-header__inner{ padding:8px 12px; gap:8px }
+  .app-title{ font-size:16px; gap:8px }
+  .app-title svg{ width:20px; height:20px }
+  .lang-toggle button{ padding:6px 9px; font-size:12px }
+
+  .catalog-topbar{ flex-direction:column; align-items:stretch }
+  .catalog-actions{ justify-content:space-between }
+  .filters-drawer{ right:0; width:100%; max-height:60vh } /* на телефоне — ширина контейнера */
+  .search-input--compact{ width:100% }
+
+  .canvas-frame{ width:100% }
+}

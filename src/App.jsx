@@ -1,56 +1,60 @@
-import { Routes, Route, Link } from 'react-router-dom'
-import { useState, useEffect } from 'react'
-import Home from './pages/Home.jsx'
-import Projectile from './pages/Projectile.jsx'
-import Spring from './pages/Spring.jsx'
+import { HashRouter, Routes, Route, Link } from 'react-router-dom'
+import { useState } from 'react'
+import Home from './pages/Home'
+import Projectile from './pages/Projectile'
+import Spring from './pages/Spring'
 
-/** Локализация заголовка и, при необходимости, других подписей шапки */
-const DICT = {
-  ru: { brand: 'Физика в ОШ «Антон Чехов»' },
-  en: { brand: 'Physics at “Anton Chekhov” School' },
-  // српски (ћирилица)
-  sr: { brand: 'Физика у ОШ „Антон Чехов“', springTitle: 'Опружно клатно' },
+const TITLE = {
+  ru: 'Физика в ОШ «Антон Чехов»',
+  en: 'Physics at “Anton Chekhov” School',
+  sr: 'Физика у ОШ „Антон Чехов“',
 }
 
 export default function App(){
-  const [lang, setLang] = useState(() => localStorage.getItem('lang') || 'ru')
-  useEffect(()=>{ localStorage.setItem('lang', lang) }, [lang])
+  const [lang, setLang] = useState('ru')
 
   return (
-    <div>
-      {/* Фиксированный хедер */}
+    <HashRouter>
       <header className="app-header">
-        <div className="app-header__inner">
-          {/* Бренд — ссылка на главную */}
-          <Link to="/" className="app-title">
-            <svg viewBox="0 0 64 64" aria-hidden="true">
-              <circle cx="32" cy="32" r="4" fill="#C00000"/>
-              <ellipse cx="32" cy="32" rx="22" ry="10" fill="none" stroke="#fff" strokeWidth="2"/>
-              <ellipse cx="32" cy="32" rx="22" ry="10" fill="none" stroke="#fff" strokeWidth="2" transform="rotate(60 32 32)"/>
-              <ellipse cx="32" cy="32" rx="22" ry="10" fill="none" stroke="#fff" strokeWidth="2" transform="rotate(-60 32 32)"/>
+        <div className="container app-header__inner">
+          <Link to="/" className="app-title" title="На главную">
+            {/* Иконка «атом», завязанная на currentColor и не плывёт */}
+            <svg className="logo" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="2.2" fill="currentColor"/>
+              <g fill="none" stroke="currentColor" strokeWidth="1.5" vectorEffect="non-scaling-stroke">
+                <ellipse cx="12" cy="12" rx="9" ry="5.6" />
+                <ellipse cx="12" cy="12" rx="9" ry="5.6" transform="rotate(60 12 12)"/>
+                <ellipse cx="12" cy="12" rx="9" ry="5.6" transform="rotate(-60 12 12)"/>
+              </g>
             </svg>
-            <span>{DICT[lang].brand}</span>
+            <span>{TITLE[lang] || TITLE.ru}</span>
           </Link>
 
-          {/* Переключатель языков — компактная «пилюля» */}
-          <div className="lang-toggle" role="group" aria-label="Language">
-            {['ru','en','sr'].map(l => (
-              <button key={l} className={l===lang?'active':''} onClick={()=>setLang(l)}>
-                {l==='ru'?'Рус':l==='en'?'Eng':'Срп'}
+          <div className="lang-toggle" role="tablist" aria-label="Выбор языка">
+            {['ru','sr','en'].map(code=>(
+              <button
+                key={code}
+                role="tab"
+                className={code===lang?'active':''}
+                onClick={()=>setLang(code)}
+                aria-selected={code===lang}
+                title={code.toUpperCase()}
+              >
+                {code.toUpperCase()}
               </button>
             ))}
           </div>
         </div>
       </header>
 
-      {/* Контент */}
       <main className="app-main">
         <Routes>
           <Route path="/" element={<Home lang={lang} />} />
           <Route path="/sim/projectile" element={<Projectile lang={lang} />} />
           <Route path="/sim/spring" element={<Spring lang={lang} />} />
+          {/* новые симуляции добавляй по образцу ↑ */}
         </Routes>
       </main>
-    </div>
+    </HashRouter>
   )
 }
