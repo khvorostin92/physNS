@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from "react"
 const TXT = {
   ru: { title: "Бросок под углом", g: "Ускорение g", air: "Сопротивление воздуха", reset: "Сброс", qTitle: "Вопросы" },
   en: { title: "Projectile Motion", g: "Gravity g", air: "Air resistance", reset: "Reset", qTitle: "Questions" },
-  sr: { title: "Бацанје под углом", g: "Убрзање g", air: "Отпор ваздуха", reset: "Почетак", qTitle: "Питања" },
+  sr: { title: "Бацање под углом", g: "Убрзање g", air: "Отпор ваздуха", reset: "Почетак", qTitle: "Питања" },
 }
 
 const UNITS = {
