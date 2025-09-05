@@ -62,6 +62,14 @@ function asset(rel) {
 /** Каталог симуляций */
 const SIMS = [
   {
+  id: 'cannon',
+  titles: { ru:'Бросок под углом', en:'Projectile motion', sr:'Бацање под углом' },
+  to: '/sim/cannon',
+  img: asset('thumbs/cannon.png'),
+  classes: ['6','7'],
+  topics: ['kinematics','dynamics']
+  },
+  {
     id: 'projectile',
     titles: { ru:'Математический маятник', en:'Simple Pendulum', sr:'Математичко клатно' },
     to: '/sim/projectile',

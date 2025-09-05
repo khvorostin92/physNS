@@ -3,6 +3,8 @@ import { useState } from 'react'
 import Home from './pages/Home'
 import Projectile from './pages/Projectile'
 import Spring from './pages/Spring'
+import Cannon from './pages/Cannon'
+
 
 const TITLE = {
   ru: 'Физика в ОШ «Антон Чехов»',
@@ -52,6 +54,7 @@ export default function App(){
           <Route path="/" element={<Home lang={lang} />} />
           <Route path="/sim/projectile" element={<Projectile lang={lang} />} />
           <Route path="/sim/spring" element={<Spring lang={lang} />} />
+          <Route path="/sim/cannon" element={<Cannon lang={lang} />} />
           {/* новые симуляции добавляй по образцу ↑ */}
         </Routes>
       </main>
