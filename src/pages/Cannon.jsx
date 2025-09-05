@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react"
 
 /**
- * 🎯 Симуляция броска под углом к горизонту (обновление по ТЗ)
- * — Цвета: земля #D6DCE5, пушка #ADB9CA, колесо #8497B0, ядро #ADB9CA,
- *   след #ADB9CA (растворяется), мишень #C00000/#F2F2F2
- * — Горизонт ~92% H (земля 8%). Колесо стоит на земле; ствол короче ×1.5 и толще ×1.5.
- * — g-подсказка рядом со значением, фиксированные колонки — ничего не наезжает.
- * — Мишени (4 круга) — теперь их ДВЕ; каждая спавнится не ближе к пушке, чем 0.4 * H.
- * — Попадание удаляет снаряд и респавнит только ту мишень, в которую попали.
+ * 🎯 Симуляция броска под углом к горизонту
+ * Обновления:
+ *  • Тач-управление через Pointer Events (выстрел при отпускании — pointerup).
+ *  • ДВЕ мишени одновременно.
+ *  • Каждая мишень спавнится в случайном месте ВЫШЕ земли и НЕ ближе к пушке,
+ *    чем 0.4 * высоты холста.
+ *  • Остальная логика/цвета/интерфейс — как было.
  */
 
 const TXT = {
@@ -37,22 +37,13 @@ const QA = {
   ],
 }
 
-// Тела с g в диапазоне [0..10] (без сравнения по массе)
+// Тела с g в диапазоне [0..10]
 const PLANETS = [
-  { name: "Церера", g: 0.27 },
-  { name: "Плутон", g: 0.62 },
-  { name: "Эрида", g: 0.82 },
-  { name: "Европа", g: 1.31 },
-  { name: "Каллисто", g: 1.24 },
-  { name: "Ганимед", g: 1.43 },
-  { name: "Титан", g: 1.35 },
-  { name: "Луна", g: 1.62 },
-  { name: "Ио", g: 1.80 },
-  { name: "Меркурий", g: 3.70 },
-  { name: "Марс", g: 3.71 },
-  { name: "Уран", g: 8.69 },
-  { name: "Венера", g: 8.87 },
-  { name: "Земля", g: 9.8 },
+  { name: "Церера", g: 0.27 }, { name: "Плутон", g: 0.62 }, { name: "Эрида", g: 0.82 },
+  { name: "Европа", g: 1.31 }, { name: "Каллисто", g: 1.24 }, { name: "Ганимед", g: 1.43 },
+  { name: "Титан", g: 1.35 }, { name: "Луна", g: 1.62 }, { name: "Ио", g: 1.80 },
+  { name: "Меркурий", g: 3.70 }, { name: "Марс", g: 3.71 }, { name: "Уран", g: 8.69 },
+  { name: "Венера", g: 8.87 }, { name: "Земля", g: 9.8 },
 ]
 
 export default function ProjectileSim({ lang = "ru" }) {
@@ -65,37 +56,69 @@ export default function ProjectileSim({ lang = "ru" }) {
 
   const canvasRef = useRef(null)
   const gunRef = useRef({ x: 120, y: 360, angle: -Math.PI/4 })
-  const mouseRef = useRef({ x: 0, y: 0, down: false })
+  const pointerRef = useRef({ x: 0, y: 0, down: false })
 
-  // ⬇️ Был один targetRef, теперь массив из двух мишеней
+  // 🎯 Две мишени
   const targetsRef = useRef([]) // [{x,y,r}, {x,y,r}]
 
   // Параметры ядра/мишени (увеличены в 1.5×)
   const BALL_R = 9
   const TARGET_R = BALL_R * 2 // диаметр = 2× диаметр ядра
 
+  // Pointer Events (тач + мышь)
   useEffect(() => {
     const cv = canvasRef.current; if (!cv) return
-    const move = (e) => { const r = cv.getBoundingClientRect(); mouseRef.current.x = e.clientX - r.left; mouseRef.current.y = e.clientY - r.top }
-    const down = (e) => { if (e.button === 0) mouseRef.current.down = true }
-    const up = () => { mouseRef.current.down = false }
-    cv.addEventListener('mousemove', move); cv.addEventListener('mousedown', down); window.addEventListener('mouseup', up)
-    return () => { cv.removeEventListener('mousemove', move); cv.removeEventListener('mousedown', down); window.removeEventListener('mouseup', up) }
+    cv.style.touchAction = 'none' // отключаем прокрутку/жесты поверх канваса
+
+    const posFromEvent = (e) => {
+      const r = cv.getBoundingClientRect()
+      pointerRef.current.x = e.clientX - r.left
+      pointerRef.current.y = e.clientY - r.top
+    }
+    const onPointerMove = (e) => { posFromEvent(e) }
+    const onPointerDown = (e) => {
+      // ЛКМ/палец/перо — начинаем прицеливание
+      if (e.button !== 0 && e.pointerType === 'mouse') return
+      cv.setPointerCapture(e.pointerId)
+      posFromEvent(e)
+      pointerRef.current.down = true
+    }
+    const onPointerUp = (e) => {
+      // Отпустили — производим выстрел
+      posFromEvent(e)
+      if (pointerRef.current.down) fireShot()
+      pointerRef.current.down = false
+      try { cv.releasePointerCapture(e.pointerId) } catch {}
+    }
+    const onPointerCancel = () => { pointerRef.current.down = false }
+
+    cv.addEventListener('pointermove', onPointerMove, { passive: true })
+    cv.addEventListener('pointerdown', onPointerDown, { passive: true })
+    cv.addEventListener('pointerup', onPointerUp, { passive: true })
+    cv.addEventListener('pointercancel', onPointerCancel, { passive: true })
+
+    return () => {
+      cv.removeEventListener('pointermove', onPointerMove)
+      cv.removeEventListener('pointerdown', onPointerDown)
+      cv.removeEventListener('pointerup', onPointerUp)
+      cv.removeEventListener('pointercancel', onPointerCancel)
+    }
   }, [])
 
-  // Спавним ДВЕ мишени после монтирования с ограничением дистанции от пушки
+  // Стартовый спавн двух мишеней
   useEffect(() => {
     const cv = canvasRef.current; if (!cv) return
     const W = cv.width, H = cv.height
     const horizonY = Math.round(H * 0.92)
-    const gun = gunRef.current
     const minDist = 0.4 * H
+    const gun = gunRef.current
     targetsRef.current = [
       spawnTargetAwayFromGun(W, H, horizonY, TARGET_R, gun, minDist),
       spawnTargetAwayFromGun(W, H, horizonY, TARGET_R, gun, minDist),
     ]
   }, [])
 
+  // Игровой цикл
   useEffect(() => {
     let raf = 0, prev = performance.now()
     const tick = (now) => {
@@ -115,26 +138,16 @@ export default function ProjectileSim({ lang = "ru" }) {
       const gun = gunRef.current
       gun.y = horizonY - wheelR // колесо опирается на землю
 
-      // наведение на курсор
-      const dx = mouseRef.current.x - gun.x
-      const dy = mouseRef.current.y - gun.y
+      // наведение на текущую позицию указателя
+      const dx = pointerRef.current.x - gun.x
+      const dy = pointerRef.current.y - gun.y
       gun.angle = Math.atan2(dy, dx)
-
-      // выстрел (усиленная скорость, мгновенное появление из дула)
-      if (mouseRef.current.down) {
-        const dist = Math.hypot(dx, dy)
-        const v0 = Math.min(dist / 6, 800)
-        const vx = v0 * Math.cos(gun.angle)
-        const vy = v0 * Math.sin(gun.angle)
-        const muzzle = barrelMuzzle(gun.x, gun.y, gun.angle)
-        const shot = { x: muzzle.x, y: muzzle.y, vx, vy, path: [[muzzle.x, muzzle.y]] }
-        shots.push(shot); setShots([...shots]); mouseRef.current.down = false
-      }
 
       // интеграция и столкновения/попадания
       for (let s of shots) {
         integrateRK4(s, dt, g, air)
         s.path.push([s.x, s.y])
+
         // отскок от земли
         if (s.y > horizonY - BALL_R && s.vy > 0) {
           s.y = horizonY - BALL_R
@@ -142,6 +155,7 @@ export default function ProjectileSim({ lang = "ru" }) {
           s.vy = -s.vy * e
           s.vx = s.vx * e
         }
+
         // попадание в любую из мишеней
         for (let i = 0; i < targetsRef.current.length; i++) {
           const tgt = targetsRef.current[i]
@@ -149,14 +163,14 @@ export default function ProjectileSim({ lang = "ru" }) {
           const d = Math.hypot(s.x - tgt.x, s.y - tgt.y)
           if (d <= tgt.r) {
             s.hit = true
-            // респавним ТОЛЬКО эту мишень, соблюдая ограничение по расстоянию от пушки
             targetsRef.current[i] = spawnTargetAwayFromGun(
               W, H, horizonY, TARGET_R, gunRef.current, 0.4 * H
             )
             break
           }
         }
-        // детекция «остановился»
+
+        // остановился?
         const speed = Math.hypot(s.vx, s.vy)
         const nearGround = s.y >= horizonY - BALL_R - 1.5
         if (speed < 12 && nearGround) { s.restTime = (s.restTime || 0) + dt } else { s.restTime = 0 }
@@ -201,13 +215,27 @@ export default function ProjectileSim({ lang = "ru" }) {
       // ствол — короче ×1.5 и толще ×1.5, сужающийся и со скруглением
       drawBarrel(ctx, gun.x, gun.y, gun.angle)
       // колесо поверх ствола
-      ctx.fillStyle = '#8497B0'; ctx.beginPath(); ctx.arc(gun.x, gun.y, 24, 0, Math.PI*2); ctx.fill()
+      ctx.fillStyle = '#8497B0'; ctx.beginPath(); ctx.arc(gun.x, gun.y, wheelR, 0, Math.PI*2); ctx.fill()
 
       raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
   }, [shots, g, air])
+
+  // выстрел формируем при отпускании (pointerup)
+  function fireShot() {
+    const gun = gunRef.current
+    const dx = pointerRef.current.x - gun.x
+    const dy = pointerRef.current.y - gun.y
+    const dist = Math.hypot(dx, dy)
+    const v0 = Math.min(dist / 6, 800)
+    const vx = v0 * Math.cos(gun.angle)
+    const vy = v0 * Math.sin(gun.angle)
+    const muzzle = barrelMuzzle(gun.x, gun.y, gun.angle)
+    const shot = { x: muzzle.x, y: muzzle.y, vx, vy, path: [[muzzle.x, muzzle.y]] }
+    shots.push(shot); setShots([...shots])
+  }
 
   // подпись планеты рядом с ползунком g (фиксированные колонки, эллипсис)
   const planet = pickPlanet(g)
@@ -302,7 +330,7 @@ function drawTarget(ctx, tgt){
   }
 }
 
-// Новый спавн: в любом месте выше земли, но НЕ ближе к пушке, чем minDist
+// 🎯 Новый спавн: в любом месте выше земли, но НЕ ближе к пушке, чем minDist
 function spawnTargetAwayFromGun(W, H, horizonY, r, gun, minDist){
   const margin = 20
   const xMin = margin + r, xMax = W - margin - r
@@ -319,14 +347,6 @@ function spawnTargetAwayFromGun(W, H, horizonY, r, gun, minDist){
   const x = clamp(gun.x + Math.cos(ang) * minDist, xMin, xMax)
   const y = clamp(gun.y + Math.sin(ang) * minDist, yMin, yMax)
   return { x, y, r }
-}
-
-// (Старая функция спавна сохранена на случай использования в будущем)
-function spawnTarget(W, horizonY, r){
-  const margin = 20
-  const xMin = Math.max(W*0.55, margin + r), xMax = W - margin - r
-  const yMin = margin + r, yMax = horizonY - margin - r
-  return { x: rand(xMin, xMax), y: rand(yMin, yMax), r }
 }
 
 function rand(a,b){ return a + Math.random()*(b-a) }
