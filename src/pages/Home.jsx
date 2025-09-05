@@ -28,7 +28,7 @@ const TOPIC_LABELS = {
     em_induction:'электромагнитная индукция и электромагнитные колебания',
     em_osc:'электромагнитные колебания',
     em_waves_optics:'электромагнитные волны и оптика',
-    sr_basics:'Основы СТО',
+    sr_basics:'основы СТО',
   },
   en: {
     kinematics:'Kinematics', dynamics:'Dynamics', conservation:'Conservation laws', statics:'Statics',
