@@ -29,7 +29,7 @@ export default function CarMotion({ lang='ru' }) {
   // Параметры
   const [gas, setGas]   = useState(60)     // 0..120% (после 90% начинается буксование)
   const [mass, setMass] = useState(1200)   // кг
-  const [cAir, setCAir] = useState(0.40)   // k (кг/м) ~ 0.3..0.6 типично
+  const [cAir, setCAir] = useState(0.0)    // k (кг/м) ~ 0.3..0.6 типично
   const [mu, setMu]     = useState(0.8)    // коэффициент сцепления
   const g = 9.8
 
