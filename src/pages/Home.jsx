@@ -70,6 +70,14 @@ const SIMS = [
   topics: ['kinematics','dynamics']
   },
   {
+  id: 'car',
+  titles: { ru:'Авто на дороге', en:'Car on the Road', sr:'Ауто на путу' },
+  to: '/sim/car',
+  img: asset('thumbs/car.png'),
+  classes: ['7'],
+  topics: ['kinematics','dynamics']
+  },
+  {
     id: 'projectile',
     titles: { ru:'Математический маятник', en:'Simple Pendulum', sr:'Математичко клатно' },
     to: '/sim/projectile',
@@ -85,6 +93,25 @@ const SIMS = [
     classes: ['7','8'],
     topics: ['osc_waves'],
   },
+  {
+  id: 'pendulum-energy',
+  titles: { ru:'Маятник — энергия', en:'Pendulum — energy', sr:'Клатно — енергија' },
+  to: '/sim/pendulum-energy',
+  img: asset('thumbs/pendulum-energy.png'),
+  classes: ['7','8'],
+  topics: ['osc_waves','conservation'],
+  },
+  {
+  id: 'spring-energy',
+  titles: { ru:'Пружинный маятник — энергия', en:'Spring — energy', sr:'Опружно клатно — енергија'},
+  to: '/sim/spring-energy',
+  img: asset('thumbs/spring-energy.png'),
+  classes: ['7','8'],
+  topics: ['osc_waves','conservation'],
+  }
+
+
+
   // добавляй новые по образцу ↑
 ]
 
