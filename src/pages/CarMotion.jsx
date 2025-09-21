@@ -39,6 +39,10 @@ export default function CarMotion({ lang='ru' }) {
   const vRef = useRef(0)   // скорость (м/с)
   const tRef = useRef(0)   // время (с)
 
+  // Фиксированный шаг интегрирования
+  const STEP = 0.01
+  const accRef = useRef(0)       // аккумулятор «реального» времени в секундах
+
   // Стрелки (чекпоинты): 0..180 м, фиксируют время и скорость при проезде
   const [points, setPoints] = useState([
     { id: 1, x: 40,  hitTime: null, hitSpeed: null, color: COLORS[0] },
@@ -66,15 +70,35 @@ export default function CarMotion({ lang='ru' }) {
     img.onerror = () => { carImgRef.current = null }
   }, [])
 
-  // Главный цикл (rAF)
+  // Главный цикл (rAF) с фиксированным шагом физики 0.01 с
   useEffect(() => {
-    let raf = 0, prev = performance.now()
+    let raf = 0
+    let prev = performance.now()
+
     const tick = (now) => {
-      const dt = Math.min((now - prev) / 1000, 1/20); prev = now
-      if (running) integrate(dt)
+      // реальное прошедшее время между кадрами
+      let dtReal = (now - prev) / 1000
+      prev = now
+
+      // защитный кап — не копить слишком много (например, при переключении вкладок)
+      if (dtReal > 0.25) dtReal = 0.25
+
+      // накапливаем и «выкусываем» строго по 0.01 с
+      accRef.current += dtReal
+      if (running) {
+        let steps = 0
+        const MAX_STEPS_PER_FRAME = 300 // 3 секунды симуляции за кадр максимум
+        while (accRef.current >= STEP && steps < MAX_STEPS_PER_FRAME) {
+          integrate(STEP)   // << строго 0.01 с
+          accRef.current -= STEP
+          steps++
+        }
+      }
+
       draw()
       raf = requestAnimationFrame(tick)
     }
+
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
   }, [running])
@@ -272,12 +296,14 @@ export default function CarMotion({ lang='ru' }) {
   function onStart() {
     setPoints(ps => ps.map(p => ({ ...p, hitTime: null, hitSpeed: null })))
     xRef.current = 0; vRef.current = 0; tRef.current = 0
+    accRef.current = 0
     setRunning(true)
   }
 
   function onReset() {
     setRunning(false)
     xRef.current = 0; vRef.current = 0; tRef.current = 0
+    accRef.current = 0
     setPoints(ps => ps.map(p => ({ ...p, hitTime: null, hitSpeed: null })))
   }
 

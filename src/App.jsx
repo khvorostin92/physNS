@@ -3,10 +3,12 @@ import { useState } from 'react'
 import Home from './pages/Home'
 import Cannon from './pages/Cannon'
 import CarMotion from './pages/CarMotion.jsx'
+import Tribometer from './pages/Tribometer.jsx'
 import Projectile from './pages/Projectile'
 import Spring from './pages/Spring'
 import PendulumEnergy from './pages/PendulumEnergy.jsx'
 import SpringEnergy from './pages/SpringEnergy.jsx'
+
 
 
 const TITLE = {
@@ -106,6 +108,8 @@ export default function App(){
             <Route path="/sim/spring" element={<Spring lang={lang} />} />
             <Route path="/sim/pendulum-energy" element={<PendulumEnergy lang={lang} />} />
             <Route path="/sim/spring-energy" element={<SpringEnergy lang={lang} />} />
+            <Route path="/sim/tribometer" element={<Tribometer lang={lang} />} /> {/* ← НОВОЕ */}
+
                         {/* новые симуляции добавляй по образцу ↑ */}
           </Routes>
         </main>

@@ -77,6 +77,16 @@ const SIMS = [
   classes: ['7'],
   topics: ['kinematics','dynamics']
   },
+
+  {
+  id: 'tribometer',
+  titles: { ru:'2-й закон Ньютона', en:'Newton’s 2nd law', sr:'Њутнов други закон' },
+  to: '/sim/tribometer',
+  img: asset('thumbs/tribometer.png'),
+  classes: ['7'],
+  topics: ['kinematics','dynamics'],
+  },
+
   {
     id: 'projectile',
     titles: { ru:'Математический маятник', en:'Simple Pendulum', sr:'Математичко клатно' },
@@ -108,7 +118,7 @@ const SIMS = [
   img: asset('thumbs/spring-energy.png'),
   classes: ['7','8'],
   topics: ['osc_waves','conservation'],
-  }
+  },
 
 
 
